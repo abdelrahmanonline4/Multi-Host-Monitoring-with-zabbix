@@ -49,8 +49,8 @@ MYSQL_SCRIPT
 
 # Download source code and initialize database
 echo "Cloning source code and initializing database..."
-git clone -b main https://github.com/hkhcoder/vprofile-project.git
-cd vprofile-project
+git clone -b Master https://github.com/abdelrahmanonline4/sourcecodeseniorwr.git
+cd sourcecodeseniorwr
 mysql -u root -padmin123 accounts < src/main/resources/db_backup.sql
 
 # Restart MariaDB service

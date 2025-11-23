@@ -74,12 +74,14 @@ firewall-cmd --reload
 # Download source code
 echo "Downloading source code..."
 cd /home/vagrant
-git clone -b main https://github.com/hkhcoder/vprofile-project.git
+git clone -b Master https://github.com/abdelrahmanonline4/sourcecodeseniorwr.git
 
 # Update configuration
 echo "Updating configuration..."
-cd vprofile-project
+cd sourcecodeseniorwr
 sed -i 's|backend.server.url=.*|backend.server.url=http://db01:3306|' src/main/resources/application.properties
+sed -i '/jdbc.username=/c jdbc.username=admin' src/main/resources/application.properties || echo "jdbc.username=admin" >> src/main/resources/application.properties
+sed -i '/jdbc.password=/c jdbc.password=admin123' src/main/resources/application.properties || echo "jdbc.password=admin123" >> src/main/resources/application.properties
 
 # Build code
 echo "Building code..."

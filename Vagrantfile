@@ -13,6 +13,30 @@ Vagrant.configure("2") do |config|
 
     # Provisioning with setup_mariadb.sh script
     db01.vm.provision "shell", path: "mariadb.sh", privileged: true
+    db01.vm.provision "shell", inline: <<-SHELL
+rpm -Uvh https://repo.zabbix.com/zabbix/7.0/rhel/9/x86_64/zabbix-release-latest.el9.noarch.rpm
+
+dnf clean all
+
+dnf install zabbix-agent2 -y
+
+sed -i 's/^Server=.*/Server=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^ServerActive=.*/ServerActive=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^Hostname=.*/Hostname=db01/' \
+/etc/zabbix/zabbix_agent2.conf
+
+systemctl enable zabbix-agent2
+systemctl restart zabbix-agent2
+systemctl enable firewalld
+systemctl start firewalld
+
+firewall-cmd --permanent --add-port=10050/tcp
+firewall-cmd --reload
+SHELL
   end
 
   # Memcache VM
@@ -26,6 +50,31 @@ Vagrant.configure("2") do |config|
 
     # Provisioning with setup_memcached.sh script
     mc01.vm.provision "shell", path: "memcached.sh", privileged: true
+    mc01.vm.provision "shell", inline: <<-SHELL
+rpm -Uvh https://repo.zabbix.com/zabbix/7.0/rhel/9/x86_64/zabbix-release-latest.el9.noarch.rpm
+
+dnf clean all
+
+dnf install zabbix-agent2 -y
+
+sed -i 's/^Server=.*/Server=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^ServerActive=.*/ServerActive=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^Hostname=.*/Hostname=mc01/' \
+/etc/zabbix/zabbix_agent2.conf
+
+systemctl enable zabbix-agent2
+systemctl restart zabbix-agent2
+
+systemctl enable firewalld
+systemctl start firewalld
+
+firewall-cmd --permanent --add-port=10050/tcp
+firewall-cmd --reload
+SHELL
   end
 
   # RabbitMQ VM
@@ -39,6 +88,30 @@ Vagrant.configure("2") do |config|
 
     # Provisioning with setup_rabbitmq.sh script
     rmq01.vm.provision "shell", path: "rabbitmq.sh", privileged: true
+    rmq01.vm.provision "shell", inline: <<-SHELL
+rpm -Uvh https://repo.zabbix.com/zabbix/7.0/rhel/9/x86_64/zabbix-release-latest.el9.noarch.rpm
+
+dnf clean all
+
+dnf install zabbix-agent2 -y
+
+sed -i 's/^Server=.*/Server=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^ServerActive=.*/ServerActive=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^Hostname=.*/Hostname=rmq01/' \
+/etc/zabbix/zabbix_agent2.conf
+
+systemctl enable zabbix-agent2
+systemctl restart zabbix-agent2
+systemctl enable firewalld
+systemctl start firewalld
+
+firewall-cmd --permanent --add-port=10050/tcp
+firewall-cmd --reload
+SHELL
   end
 
   # Tomcat VM
@@ -52,6 +125,31 @@ Vagrant.configure("2") do |config|
 
     # Provisioning with setup_tomcat.sh script
     app01.vm.provision "shell", path: "tomcat.sh", privileged: true
+    app01.vm.provision "shell", inline: <<-SHELL
+rpm -Uvh https://repo.zabbix.com/zabbix/7.0/rhel/9/x86_64/zabbix-release-latest.el9.noarch.rpm
+
+dnf clean all
+
+dnf install zabbix-agent2 -y
+
+sed -i 's/^Server=.*/Server=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^ServerActive=.*/ServerActive=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^Hostname=.*/Hostname=app01/' \
+/etc/zabbix/zabbix_agent2.conf
+
+systemctl enable zabbix-agent2
+systemctl restart zabbix-agent2
+
+systemctl enable firewalld
+systemctl start firewalld
+
+firewall-cmd --permanent --add-port=10050/tcp
+firewall-cmd --reload
+SHELL
   end
 
   # Nginx VM
@@ -66,5 +164,42 @@ Vagrant.configure("2") do |config|
 
     # Provisioning with setup_nginx.sh script
     web01.vm.provision "shell", path: "nginx.sh", privileged: true
+    web01.vm.provision "shell", inline: <<-SHELL
+wget https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest_7.0+ubuntu22.04_all.deb
+
+dpkg -i zabbix-release_latest_7.0+ubuntu22.04_all.deb
+
+apt update
+
+apt install zabbix-agent2 -y
+
+sed -i 's/^Server=.*/Server=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^ServerActive=.*/ServerActive=192.168.56.10/' \
+/etc/zabbix/zabbix_agent2.conf
+
+sed -i 's/^Hostname=.*/Hostname=web01/' \
+/etc/zabbix/zabbix_agent2.conf
+
+systemctl enable zabbix-agent2
+systemctl restart zabbix-agent2
+
+ufw allow 10050/tcp || true
+SHELL
   end
+
+  # Zabbix Server VM
+config.vm.define "zbx01" do |zbx01|
+  zbx01.vm.box = "eurolinux-vagrant/centos-stream-9"
+  zbx01.vm.hostname = "zbx01"
+  zbx01.vm.network "private_network", ip: "192.168.56.10"
+
+  zbx01.vm.provider "virtualbox" do |vb|
+    vb.memory = "4096"
+    vb.cpus = 2
+  end
+
+  zbx01.vm.provision "shell", path: "zabbix-server.sh", privileged: true
+end
 end
